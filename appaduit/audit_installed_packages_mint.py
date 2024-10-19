@@ -1,10 +1,18 @@
+#!/usr/bin/python3
+# v1.0   Ramsey + AI 
+
 import subprocess
 
 def get_installed_apps():
     """Get a list of installed packages on the system."""
-    result = subprocess.run(['dpkg', '--get-selections'], capture_output=True, text=True)
-    installed_apps = [line.split()[0] for line in result.stdout.splitlines() if line.endswith('\tinstall')]
-    return installed_apps
+
+    command = "apt list --installed | awk -F'/' '{print $1}' | grep -v 'Listing...'"
+    result  = subprocess.run(command, shell=True, text=True, capture_output=True)
+
+    # Split the output into a list
+    installed_packages = result.stdout.splitlines()
+
+    return installed_packages
 
 def get_base_apps(base_apps_file):
     """Get a list of applications from a base system file."""
@@ -19,20 +27,27 @@ def compare_apps(installed_apps, base_apps):
     
     return missing_from_base, missing_in_installed
 
+
 def main(base_apps_file):
     installed_apps = get_installed_apps()
     base_apps = get_base_apps(base_apps_file)
 
+    # print(f"\n\nDEBUG: Installed Apps: {installed_apps}")
+    # print(f"\n\nDEBUG: Base Apps: {base_apps}")
+
     missing_from_base, missing_in_installed = compare_apps(installed_apps, base_apps)
 
-    print("Missing from base system:")
-    for app in missing_from_base:
+    print("\nMissing from base system:")
+    for app in sorted(missing_from_base):
         print(f"  - {app}")
 
     print("\nMissing in installed applications:")
-    for app in missing_in_installed:
+    for app in sorted(missing_in_installed):
         print(f"  - {app}")
 
 if __name__ == '__main__':
-    base_apps_file = 'base_apps.txt'  # Change this to the path of your base apps list
+
+    # to refresh this BASELINE, run this command
+    #  apt list --installed | awk -F'/' '{print $1}' | grep -v 'Listing...'
+    base_apps_file = 'known_default_mint_21_base_apps_apt_list.txt'  # Change this to the path of your base apps list
     main(base_apps_file)
