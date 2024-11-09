@@ -1727,7 +1727,6 @@ mythes-fr
 mythes-it
 mythes-pt-pt
 mythes-ru
-nala
 nano
 nautilus-data
 ncal
